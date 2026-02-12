@@ -11,7 +11,7 @@ import { VideoInfo } from '@/types'
 import { videoApi } from '@/api/client'
 import './Home.css'
 
-// 初始示例视频数据（仅在服务器无数据时使用）
+// 初始示例视频数据
 const initialVideos: VideoInfo[] = [
   {
     id: 'demo-1',
@@ -109,6 +109,7 @@ function Home() {
   const { user, logout } = useAuthStore()
   const [videos, setVideos] = useState<VideoInfo[]>([])
   const [pageContent, setPageContent] = useState('')
+  const [isLoading, setIsLoading] = useState(true)
 
   // 从服务器获取视频列表
   useEffect(() => {
@@ -118,21 +119,18 @@ function Home() {
         const data = response.data
 
         if (data && data.length > 0) {
-          // 使用服务器数据
           setVideos(data as VideoInfo[])
         } else {
-          // 服务器没有数据，使用示例数据并同步到服务器
           setVideos(initialVideos)
-
-          // 同步示例数据到服务器
           for (const video of initialVideos) {
             await videoApi.create(video)
           }
         }
       } catch (error) {
         console.error('获取视频列表失败:', error)
-        // 如果服务器不可用，使用本地示例数据
         setVideos(initialVideos)
+      } finally {
+        setIsLoading(false)
       }
     }
 
@@ -147,12 +145,10 @@ function Home() {
       if (response.success && response.data) {
         setVideos(prev => [...prev, response.data as VideoInfo])
       } else {
-        // 如果服务器失败，仍添加到本地状态
         setVideos(prev => [...prev, video])
       }
     } catch (error) {
       console.error('保存视频失败:', error)
-      // 如果服务器不可用，仍添加到本地状态
       setVideos(prev => [...prev, video])
     }
   }
@@ -187,113 +183,287 @@ function Home() {
   const getWelcomeMessage = () => {
     switch (preferences.accessibilityType) {
       case 'visual':
-        return '欢迎使用视障优化模式'
+        return '欢迎回来，视障优化模式已启用'
       case 'hearing':
-        return '欢迎使用听障优化模式'
+        return '欢迎回来，听障优化模式已启用'
       case 'other':
-        return '欢迎使用无障碍优化模式'
+        return '欢迎回来，无障碍优化模式已启用'
       default:
-        return '欢迎使用AI教学平台'
+        return '欢迎使用 AI 教学平台'
     }
+  }
+
+  const getInitials = (name: string) => {
+    return name.charAt(0).toUpperCase()
   }
 
   return (
     <div className="home-page">
-      <header className="home-header" role="banner">
-        <h1 id="site-title">无障碍AI教学平台</h1>
-        <div className="header-content">
-          <nav aria-label="主导航" role="navigation">
-            <ul role="list">
-              <li><a href="#courses" aria-label="跳转到课程区域">课程</a></li>
-              <li><Link to="/assignments" aria-label="跳转到作业页面">作业</Link></li>
-              <li><Link to="/image-selection" aria-label="跳转到图片选择页面">图片选择</Link></li>
-              <li><Link to="/accessibility-selection" aria-label="无障碍设置">设置</Link></li>
-            </ul>
+      <a href="#main-content" className="skip-link">
+        跳转到主要内容
+      </a>
+
+      {/* Hero Section */}
+      <section className="hero-section" role="banner">
+        <div className="hero-content">
+          <span className="hero-badge">
+            <span className="welcome-badge-dot"></span>
+            人工智能驱动的无障碍学习体验
+          </span>
+          <h1 className="hero-title">
+            {getWelcomeMessage()}
+          </h1>
+          <p className="hero-subtitle">
+            为视障和听障学习者提供可访问的人工智能教学内容，
+            让每个人都能平等地获取知识。
+          </p>
+          <div className="hero-cta">
+            <Link to="/accessibility-selection" className="btn btn-primary btn-large">
+              个性化设置
+            </Link>
+            <Link to="/assignments" className="btn btn-secondary btn-large">
+              浏览课程
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Header */}
+      <header className="home-header">
+        <div className="header-inner">
+          <Link to="/" className="header-logo">
+            <span className="header-logo-icon">智</span>
+            <span>人工智能教学平台</span>
+          </Link>
+
+          <nav className="header-nav" aria-label="主导航">
+            <Link to="/assignments" className="header-nav-link">
+              课程
+            </Link>
+            <Link to="/image-selection" className="header-nav-link">
+              图片对比
+            </Link>
+            <Link to="/accessibility-selection" className="header-nav-link">
+              无障碍设置
+            </Link>
           </nav>
-          <div className="user-section">
-            <span className="user-name" aria-label={`当前用户：${user?.name}`}>
-              {user?.name}
-            </span>
-            <button
-              onClick={handleLogout}
-              className="btn-logout"
-              aria-label="退出登录"
-            >
+
+          <div className="header-user">
+            <div className="user-avatar">
+              {user?.name ? getInitials(user.name) : 'U'}
+            </div>
+            <span className="user-name">{user?.name || '用户'}</span>
+            <button onClick={handleLogout} className="btn btn-secondary">
               退出
             </button>
           </div>
         </div>
       </header>
 
+      {/* Main Content */}
       <main id="main-content" className="home-main" role="main">
-        <section
-          className="welcome-section"
-          aria-labelledby="welcome-heading"
-          aria-describedby="user-preferences"
-        >
-          <h2 id="welcome-heading">{getWelcomeMessage()}</h2>
-          <div id="user-preferences" className="preferences-info">
-            <dl>
-              <dt>当前模式：</dt>
-              <dd>{preferences.themeMode}</dd>
-              <dt>字体大小：</dt>
-              <dd>{preferences.fontSize}</dd>
-              <dt>高对比度：</dt>
-              <dd>{preferences.highContrast ? '已启用' : '未启用'}</dd>
-            </dl>
+        {/* Welcome Card */}
+        <section className="welcome-card animate-fade-in-up" aria-labelledby="welcome-heading">
+          <div className="welcome-header">
+            <div>
+              <h2 id="welcome-heading" className="welcome-title">
+                您好，{user?.name || '用户'}
+              </h2>
+              <p className="welcome-subtitle">
+                您的个性化学习空间已准备就绪
+              </p>
+            </div>
+            <div className="welcome-badge">
+              <span className="welcome-badge-dot"></span>
+              系统正常
+            </div>
+          </div>
+
+          <div className="preferences-grid" role="list" aria-label="当前设置">
+            <div className="preference-item" role="listitem">
+              <div className="preference-icon">
+                <span aria-hidden="true">👁</span>
+              </div>
+              <div className="preference-info">
+                <p className="preference-label">无障碍模式</p>
+                <p className="preference-value">
+                  {preferences.accessibilityType === 'visual' ? '视障优化' :
+                   preferences.accessibilityType === 'hearing' ? '听障优化' :
+                   preferences.accessibilityType === 'other' ? '其他优化' : '标准模式'}
+                </p>
+              </div>
+            </div>
+            <div className="preference-item" role="listitem">
+              <div className="preference-icon">
+                <span aria-hidden="true">◐</span>
+              </div>
+              <div className="preference-info">
+                <p className="preference-label">主题</p>
+                <p className="preference-value">{preferences.themeMode}</p>
+              </div>
+            </div>
+            <div className="preference-item" role="listitem">
+              <div className="preference-icon">
+                <span aria-hidden="true">A</span>
+              </div>
+              <div className="preference-info">
+                <p className="preference-label">字体大小</p>
+                <p className="preference-value">{preferences.fontSize}</p>
+              </div>
+            </div>
+            <div className="preference-item" role="listitem">
+              <div className="preference-icon">
+                <span aria-hidden="true">◑</span>
+              </div>
+              <div className="preference-info">
+                <p className="preference-label">高对比度</p>
+                <p className="preference-value">{preferences.highContrast ? '已启用' : '未启用'}</p>
+              </div>
+            </div>
           </div>
         </section>
 
-        <section
-          id="courses"
-          className="features-section"
-          aria-labelledby="features-heading"
-        >
-          <h2 id="features-heading">平台功能</h2>
-          <div className="features-grid" role="list">
-            <article className="feature-card" role="listitem">
-              <h3>
-                <span aria-hidden="true">📚 </span>
-                AI课程
-              </h3>
-              <p>提供视频和文字双版本的AI教学内容</p>
-            </article>
-            <article className="feature-card" role="listitem">
-              <h3>
-                <span aria-hidden="true">📝 </span>
-                作业系统
-              </h3>
-              <p>简单易用的作业提交和反馈功能</p>
-              <Link to="/assignments" className="feature-link" aria-label="进入作业管理">
-                进入作业管理 →
-              </Link>
-            </article>
-            <article className="feature-card" role="listitem">
-              <h3>
-                <span aria-hidden="true">♿ </span>
-                无障碍支持
-              </h3>
-              <p>完整的读屏、字幕和键盘导航支持</p>
-            </article>
+        {/* Stats Bar */}
+        <div className="stats-bar animate-fade-in-up stagger-1">
+          <div className="stat-item">
+            <div className="stat-value">{videos.length}</div>
+            <div className="stat-label">课程视频</div>
+          </div>
+          <div className="stat-item">
+            <div className="stat-value">{videos.filter(v => v.hasSubtitles).length}</div>
+            <div className="stat-label">含字幕</div>
+          </div>
+          <div className="stat-item">
+            <div className="stat-value">{videos.reduce((acc, v) => acc + (v.glossary?.length || 0), 0)}</div>
+            <div className="stat-label">术语词条</div>
+          </div>
+        </div>
+
+        {/* Quick Actions */}
+        <section className="section-header animate-fade-in-up stagger-2">
+          <div>
+            <h2 className="section-title">快速开始</h2>
+            <p className="section-subtitle">选择您想要进行的操作</p>
           </div>
         </section>
 
-        {/* 视频管理区域 */}
-        <section
-          id="video-management"
-          className="video-management-section"
-          aria-labelledby="video-management-heading"
-        >
-          <h2 id="video-management-heading">课程视频管理</h2>
+        <div className="quick-actions animate-fade-in-up stagger-3" role="list">
+          <Link to="/assignments" className="action-card" role="listitem">
+            <div className="action-icon">
+              <span aria-hidden="true">📚</span>
+            </div>
+            <div className="action-content">
+              <h3 className="action-title">浏览课程</h3>
+              <p className="action-description">探索人工智能相关课程内容</p>
+            </div>
+            <span className="action-arrow" aria-hidden="true">›</span>
+          </Link>
+
+          <Link to="/image-selection" className="action-card" role="listitem">
+            <div className="action-icon">
+              <span aria-hidden="true">🖼</span>
+            </div>
+            <div className="action-content">
+              <h3 className="action-title">图片对比</h3>
+              <p className="action-description">AI 生成图片的文字描述对比</p>
+            </div>
+            <span className="action-arrow" aria-hidden="true">›</span>
+          </Link>
+
+          <Link to="/accessibility-selection" className="action-card" role="listitem">
+            <div className="action-icon">
+              <span aria-hidden="true">⚙</span>
+            </div>
+            <div className="action-content">
+              <h3 className="action-title">无障碍设置</h3>
+              <p className="action-description">自定义您的学习体验</p>
+            </div>
+            <span className="action-arrow" aria-hidden="true">›</span>
+          </Link>
+        </div>
+
+        {/* Features Grid */}
+        <section className="section-header animate-fade-in-up stagger-4">
+          <div>
+            <h2 className="section-title">平台功能</h2>
+            <p className="section-subtitle">为无障碍学习而设计</p>
+          </div>
+        </section>
+
+        <div className="features-grid" role="list">
+          <article className="feature-card" role="listitem">
+            <div className="feature-icon">
+              <span aria-hidden="true">📝</span>
+            </div>
+            <h3 className="feature-title">智能字幕</h3>
+            <p className="feature-description">
+              自动生成视频字幕，支持多种语言，并为听障用户优化显示效果。
+            </p>
+            <Link to="/accessibility-selection" className="feature-link">
+              了解更多 <span aria-hidden="true">›</span>
+            </Link>
+          </article>
+
+          <article className="feature-card" role="listitem">
+            <div className="feature-icon">
+              <span aria-hidden="true">🔊</span>
+            </div>
+            <h3 className="feature-title">语音朗读</h3>
+            <p className="feature-description">
+              将文字内容转换为自然语音，支持语速和音调调节。
+            </p>
+            <Link to="/accessibility-selection" className="feature-link">
+              了解更多 <span aria-hidden="true">›</span>
+            </Link>
+          </article>
+
+          <article className="feature-card" role="listitem">
+            <div className="feature-icon">
+              <span aria-hidden="true">🖼</span>
+            </div>
+            <h3 className="feature-title">图像描述</h3>
+            <p className="feature-description">
+              AI 自动识别图片内容，为视障用户提供详细的文字描述。
+            </p>
+            <Link to="/image-selection" className="feature-link">
+              立即体验 <span aria-hidden="true">›</span>
+            </Link>
+          </article>
+
+          <article className="feature-card" role="listitem">
+            <div className="feature-icon">
+              <span aria-hidden="true">📖</span>
+            </div>
+            <h3 className="feature-title">术语解释</h3>
+            <p className="feature-description">
+              自动提取课程中的专业术语，提供通俗易懂的解释。
+            </p>
+            <Link to="/assignments" className="feature-link">
+              浏览术语 <span aria-hidden="true">›</span>
+            </Link>
+          </article>
+        </div>
+
+        {/* Video Management */}
+        <section className="video-section animate-fade-in-up stagger-4" aria-labelledby="video-heading">
+          <div className="video-section-header">
+            <div>
+              <h2 id="video-heading" className="section-title">课程视频</h2>
+              <p className="section-subtitle">
+                {isLoading ? '加载中...' : `${videos.length} 个课程视频`}
+              </p>
+            </div>
+          </div>
+
           <VideoImport onVideoAdd={handleVideoAdd} />
           <VideoList videos={videos} onVideoRemove={handleVideoRemove} />
         </section>
 
-        {/* 无障碍功能演示 */}
+        {/* Accessibility Demo */}
         <AccessibilityDemo />
       </main>
 
-      {/* 智能朗读控制 */}
+      {/* Smart Reader */}
       <SmartReader content={pageContent} />
     </div>
   )

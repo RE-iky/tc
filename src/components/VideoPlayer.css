@@ -163,7 +163,7 @@
   text-align: center;
 }
 
-/* AI 分析面板 */
+/* AI内容分析面板 */
 .video-analysis {
   margin-top: 1.5rem;
   background: var(--bg-secondary, #f8f9fa);

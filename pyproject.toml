@@ -1,7 +1,49 @@
 [project]
 name = "tc"
 version = "0.1.0"
-description = "Add your description here"
+description = "无障碍AI教学平台 - 为残障学习者提供可访问的AI学习体验"
 readme = "README.md"
 requires-python = ">=3.14"
-dependencies = []
+dependencies = [
+    # Web 框架
+    "fastapi>=0.109.0",
+    "uvicorn>=0.27.0",
+    "pydantic>=2.5.0",
+    "pydantic-settings>=2.1.0",
+    # 视频处理
+    "yt-dlp>=2024.1.0",
+    "ffmpeg-python>=0.2.0",
+    "opencv-python-headless>=4.9.0",
+    # OCR 与视觉
+    "easyocr>=1.7.0",
+    # HTTP 客户端
+    "httpx>=0.26.0",
+    # 其他工具
+    "python-multipart>=0.0.6",
+    "python-dotenv>=1.0.0",
+    "dashscope>=1.25.12",
+    "loguru>=0.7.3",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.23.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["api/bili_text"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["api/tests"]
+
+[tool.uv]
+dev-dependencies = [
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.23.0",
+]

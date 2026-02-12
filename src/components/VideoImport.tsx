@@ -190,7 +190,7 @@ function VideoImport({ onVideoAdd }: VideoImportProps) {
 
         <div className="form-group glossary-section">
           <div className="glossary-header">
-            <label>AI术语解释 <span className="optional-label">（可选）</span></label>
+            <label>术语解释 <span className="optional-label">（可选）</span></label>
             <button
               type="button"
               onClick={handleAddTerm}

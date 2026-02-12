@@ -61,9 +61,9 @@ function Login() {
     <main id="main-content" className="login-page" role="main">
       <div className="login-container">
         <header>
-          <h1 id="page-title">无障碍AI教学平台</h1>
+          <h1 id="page-title">无障碍人工智能教学平台</h1>
           <p className="subtitle" id="page-description">
-            为残障学习者提供可访问的AI学习体验
+            为残障学习者提供可访问的人工智能学习体验
           </p>
         </header>
 
