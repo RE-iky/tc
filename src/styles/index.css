@@ -1,0 +1,92 @@
+/* 全局样式重置 */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* 基础样式 */
+:root {
+  font-family: 'Avenir Next', 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  line-height: 1.6;
+  font-weight: 400;
+
+  /* 默认主题颜色 */
+  --color-primary: #1890ff;
+  --color-text: #333333;
+  --color-bg: #ffffff;
+  --color-border: #d9d9d9;
+
+  /* Alias tokens to keep legacy page/component styles consistent. */
+  --primary-color: var(--color-primary);
+  --primary-hover: #096dd9;
+  --text-primary: var(--color-text);
+  --text-secondary: #666666;
+  --bg-primary: var(--color-bg);
+  --bg-secondary: #ffffff;
+  --bg-hover: #f0f0f0;
+  --bg-active: #e6f7ff;
+  --border-color: var(--color-border);
+  --focus-color: var(--color-primary);
+  --color-background: var(--color-bg);
+  --color-text-secondary: var(--text-secondary);
+
+  /* 无障碍 - 焦点样式 */
+  --focus-outline: 3px solid #1890ff;
+  --focus-outline-offset: 2px;
+}
+
+body {
+  margin: 0;
+  color: var(--color-text);
+  background-color: var(--color-bg);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* 无障碍 - 跳转链接 */
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background: var(--color-primary);
+  color: white;
+  padding: 8px 16px;
+  text-decoration: none;
+  z-index: 100;
+}
+
+.skip-link:focus {
+  top: 0;
+}
+
+/* 无障碍 - 焦点可见性 */
+*:focus-visible {
+  outline: var(--focus-outline);
+  outline-offset: var(--focus-outline-offset);
+}
+
+/* 移除默认焦点样式，但保留focus-visible */
+*:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* 确保按钮和链接有明显的焦点样式 */
+button:focus-visible,
+a:focus-visible {
+  outline: var(--focus-outline);
+  outline-offset: var(--focus-outline-offset);
+}
+
+/* 仅供屏幕阅读器使用的内容 */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}

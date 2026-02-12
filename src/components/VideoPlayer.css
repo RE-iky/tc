@@ -1,0 +1,181 @@
+.video-player {
+  background: var(--bg-primary, #fff);
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin: 1rem 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.video-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.video-header h3 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: var(--text-primary, #333);
+}
+
+.close-button {
+  background: transparent;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  color: var(--text-secondary, #666);
+  transition: color 0.2s;
+}
+
+.close-button:hover {
+  color: var(--text-primary, #333);
+}
+
+.close-button:focus {
+  outline: 2px solid var(--primary-color, #1976d2);
+  outline-offset: 2px;
+}
+
+.video-container {
+  position: relative;
+  width: 100%;
+  padding-bottom: 56.25%; /* 16:9 宽高比 */
+  background: #000;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.video-iframe,
+.video-element {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+.video-controls {
+  margin-top: 1rem;
+  display: flex;
+  gap: 1rem;
+}
+
+.transcript-toggle {
+  padding: 0.5rem 1rem;
+  background: var(--bg-secondary, #f5f5f5);
+  border: 2px solid var(--border-color, #ddd);
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  transition: all 0.2s;
+}
+
+.transcript-toggle:hover {
+  background: var(--bg-hover, #e0e0e0);
+}
+
+.transcript-toggle:focus {
+  outline: 2px solid var(--primary-color, #1976d2);
+  outline-offset: 2px;
+}
+
+.video-transcript {
+  margin-top: 1.5rem;
+  padding: 1.5rem;
+  background: var(--bg-secondary, #f5f5f5);
+  border-radius: 4px;
+  border-left: 4px solid var(--primary-color, #1976d2);
+}
+
+.video-transcript h4 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+  font-size: 1.2rem;
+  color: var(--text-primary, #333);
+}
+
+.transcript-content {
+  line-height: 1.8;
+  color: var(--text-primary, #333);
+  white-space: pre-wrap;
+}
+
+.video-description {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  border-top: 1px solid var(--border-color, #ddd);
+}
+
+.video-description h4 {
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+  font-size: 1.1rem;
+}
+
+.video-full-description {
+  margin-top: 1.5rem;
+  padding: 1.5rem;
+  background: linear-gradient(135deg, #f0f7ff 0%, #e8f4fd 100%);
+  border-radius: 8px;
+  border-left: 4px solid #1976d2;
+}
+
+.full-description-title {
+  margin-top: 0;
+  margin-bottom: 1rem;
+  font-size: 1.15rem;
+  color: #1565c0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.full-description-title::before {
+  content: "📝";
+}
+
+.full-description-content {
+  line-height: 1.9;
+  color: var(--text-primary, #333);
+  white-space: pre-wrap;
+  font-size: 1rem;
+}
+
+/* 视障模式下的样式 */
+[data-font-size="large"] .full-description-content {
+  font-size: 1.2rem;
+  line-height: 2;
+}
+
+[data-high-contrast="true"] .video-full-description {
+  background: #000;
+  border-color: #fff;
+}
+
+[data-high-contrast="true"] .full-description-title {
+  color: #fff;
+}
+
+[data-high-contrast="true"] .full-description-content {
+  color: #fff;
+}
+
+/* 高对比度模式 */
+[data-high-contrast="true"] .video-player {
+  background: #000;
+  border: 2px solid #fff;
+}
+
+[data-high-contrast="true"] .transcript-toggle {
+  background: #000;
+  color: #fff;
+  border-color: #fff;
+}
+
+[data-high-contrast="true"] .video-transcript {
+  background: #000;
+  border-color: #fff;
+}

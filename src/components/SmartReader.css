@@ -1,0 +1,118 @@
+.smart-reader {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 1000;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  padding: 16px;
+}
+
+.reader-controls {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.reader-btn {
+  padding: 10px 16px;
+  border: none;
+  border-radius: 8px;
+  background: #4CAF50;
+  color: white;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.reader-btn:hover {
+  background: #45a049;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.reader-btn:active {
+  transform: translateY(0);
+}
+
+.reader-btn:focus {
+  outline: 2px solid #4CAF50;
+  outline-offset: 2px;
+}
+
+.reader-btn-pause {
+  background: #FF9800;
+}
+
+.reader-btn-pause:hover {
+  background: #F57C00;
+}
+
+.reader-btn-stop {
+  background: #f44336;
+}
+
+.reader-btn-stop:hover {
+  background: #d32f2f;
+}
+
+.reader-btn-resume {
+  background: #2196F3;
+}
+
+.reader-btn-resume:hover {
+  background: #1976D2;
+}
+
+.reader-status {
+  margin-top: 8px;
+  font-size: 12px;
+  color: #666;
+  text-align: center;
+}
+
+.smart-reader-unsupported {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: #fff3cd;
+  border: 1px solid #ffc107;
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-size: 14px;
+  color: #856404;
+}
+
+@media (max-width: 768px) {
+  .smart-reader,
+  .smart-reader-unsupported {
+    left: 12px;
+    right: 12px;
+    bottom: 12px;
+  }
+
+  .reader-controls {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .reader-btn {
+    flex: 1;
+    justify-content: center;
+    min-height: 44px;
+  }
+}
+
+/* 高对比度模式 */
+[data-high-contrast="true"] .smart-reader {
+  background: #000;
+  border: 2px solid #fff;
+}
+
+[data-high-contrast="true"] .reader-btn {
+  border: 2px solid #fff;
+}

@@ -1,0 +1,2 @@
+# Python依赖 - 本地Whisper转写
+faster-whisper>=1.0.0

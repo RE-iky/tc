@@ -1,0 +1,178 @@
+/* 主题样式 - 视障模式 */
+[data-theme="visual-impaired"] {
+  --color-primary: #0066cc;
+  --color-text: #000000;
+  --color-bg: #ffffff;
+  --color-border: #000000;
+
+  /* 大字体 */
+  font-size: 20px;
+  line-height: 1.8;
+
+  /* 简化视觉元素 */
+  --border-radius: 0;
+  --box-shadow: none;
+}
+
+[data-theme="visual-impaired"] body {
+  background-color: #ffffff;
+  color: #000000;
+}
+
+[data-theme="visual-impaired"] .home-page,
+[data-theme="visual-impaired"] .accessibility-selection-page,
+[data-theme="visual-impaired"] .login-page {
+  background-color: #ffffff;
+}
+
+[data-theme="visual-impaired"] button,
+[data-theme="visual-impaired"] a {
+  min-height: 48px;
+  min-width: 48px;
+  padding: 16px 32px;
+  border: 3px solid #000000;
+  font-weight: 700;
+  font-size: 20px;
+}
+
+[data-theme="visual-impaired"] h1 {
+  font-size: 36px;
+  font-weight: 900;
+  color: #000000;
+  border-bottom: 4px solid #000000;
+  padding-bottom: 16px;
+}
+
+[data-theme="visual-impaired"] h2 {
+  font-size: 28px;
+  font-weight: 800;
+  color: #000000;
+}
+
+[data-theme="visual-impaired"] h3 {
+  font-size: 24px;
+  font-weight: 700;
+  color: #000000;
+}
+
+[data-theme="visual-impaired"] .feature-card,
+[data-theme="visual-impaired"] .option-card,
+[data-theme="visual-impaired"] .accessibility-demo {
+  border: 3px solid #000000;
+  background-color: #ffffff;
+  padding: 24px;
+  margin: 16px 0;
+}
+
+/* 主题样式 - 听障模式 */
+[data-theme="hearing-impaired"] {
+  --color-primary: #52c41a;
+  --color-text: #1a1a1a;
+  --color-bg: #f0f9ff;
+  --color-border: #52c41a;
+}
+
+[data-theme="hearing-impaired"] body {
+  background: linear-gradient(135deg, #f0f9ff 0%, #e6f7ff 100%);
+  color: #1a1a1a;
+}
+
+[data-theme="hearing-impaired"] .home-page,
+[data-theme="hearing-impaired"] .accessibility-selection-page,
+[data-theme="hearing-impaired"] .login-page {
+  background: linear-gradient(135deg, #f0f9ff 0%, #e6f7ff 100%);
+}
+
+[data-theme="hearing-impaired"] button {
+  background: linear-gradient(135deg, #52c41a 0%, #73d13d 100%);
+  color: white;
+  border: 2px solid #389e0d;
+  box-shadow: 0 4px 12px rgba(82, 196, 26, 0.3);
+  font-weight: 600;
+}
+
+[data-theme="hearing-impaired"] button:hover {
+  background: linear-gradient(135deg, #73d13d 0%, #95de64 100%);
+  box-shadow: 0 6px 16px rgba(82, 196, 26, 0.4);
+}
+
+[data-theme="hearing-impaired"] h1 {
+  color: #237804;
+  border-bottom: 3px solid #52c41a;
+  padding-bottom: 12px;
+}
+
+[data-theme="hearing-impaired"] h2 {
+  color: #389e0d;
+}
+
+[data-theme="hearing-impaired"] .feature-card,
+[data-theme="hearing-impaired"] .option-card,
+[data-theme="hearing-impaired"] .accessibility-demo {
+  border: 2px solid #52c41a;
+  background-color: #ffffff;
+  box-shadow: 0 4px 12px rgba(82, 196, 26, 0.15);
+}
+
+[data-theme="hearing-impaired"] .feature-card:hover,
+[data-theme="hearing-impaired"] .option-card:hover {
+  border-color: #389e0d;
+  box-shadow: 0 6px 16px rgba(82, 196, 26, 0.25);
+  transform: translateY(-2px);
+  transition: all 0.3s ease;
+}
+
+/* 字体大小 */
+[data-font-size="small"] {
+  font-size: 14px;
+}
+
+[data-font-size="medium"] {
+  font-size: 16px;
+}
+
+[data-font-size="large"] {
+  font-size: 22px;
+}
+
+[data-font-size="large"] h1 {
+  font-size: 40px;
+}
+
+[data-font-size="large"] h2 {
+  font-size: 32px;
+}
+
+[data-font-size="large"] h3 {
+  font-size: 26px;
+}
+
+[data-font-size="large"] button,
+[data-font-size="large"] a {
+  font-size: 22px;
+  padding: 16px 32px;
+}
+
+/* 高对比度模式 */
+[data-high-contrast="true"] {
+  --color-text: #000000;
+  --color-bg: #ffffff;
+  --color-border: #000000;
+  filter: contrast(1.8) brightness(1.1);
+}
+
+[data-high-contrast="true"] * {
+  border-color: #000000 !important;
+}
+
+[data-high-contrast="true"] button {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+  border: 3px solid #000000 !important;
+}
+
+[data-high-contrast="true"] a {
+  color: #0000ff !important;
+  text-decoration: underline;
+  font-weight: 700;
+}

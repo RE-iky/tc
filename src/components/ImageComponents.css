@@ -1,0 +1,273 @@
+/* 图片画廊样式 */
+.image-gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  padding: 2rem;
+}
+
+.image-gallery .image-item {
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 1.5rem;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.image-gallery .image-item:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.image-gallery .image-item img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+}
+
+.image-gallery .image-item p {
+  margin: 1rem 0;
+  color: #333;
+  line-height: 1.6;
+}
+
+.image-gallery .image-item button {
+  width: 100%;
+  padding: 0.75rem;
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.image-gallery .image-item button:hover {
+  background: #0056b3;
+}
+
+.image-gallery .image-item button:focus {
+  outline: 2px solid #0056b3;
+  outline-offset: 2px;
+}
+
+/* 选中状态样式 */
+.image-gallery .image-item.selected,
+.accessible-image-selection .image-item.selected {
+  border: 3px solid #28a745;
+  box-shadow: 0 4px 16px rgba(40, 167, 69, 0.3);
+  transform: translateY(-2px);
+}
+
+.image-gallery .image-item.selected button,
+.accessible-image-selection .image-item.selected .select-btn {
+  background: #28a745;
+}
+
+.image-gallery .image-item.selected button:hover,
+.accessible-image-selection .image-item.selected .select-btn:hover {
+  background: #218838;
+}
+
+/* 图片对比样式 */
+.image-comparison {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 2rem;
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.image-comparison .image {
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 1.5rem;
+}
+
+.image-comparison .image img {
+  width: 100%;
+  height: 300px;
+  object-fit: cover;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+}
+
+.image-comparison .image p {
+  margin: 1rem 0;
+  color: #333;
+  line-height: 1.6;
+}
+
+.image-comparison .image button {
+  width: 100%;
+  padding: 0.75rem;
+  background: #28a745;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.image-comparison .image button:hover {
+  background: #218838;
+}
+
+.image-comparison .image button:focus {
+  outline: 2px solid #218838;
+  outline-offset: 2px;
+}
+
+/* 图片差异描述样式 */
+.image-difference {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 2rem;
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.image-difference .image-item {
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 1.5rem;
+}
+
+.image-difference .image-item img {
+  width: 100%;
+  height: 300px;
+  object-fit: cover;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+}
+
+.image-difference .image-item p {
+  margin: 1rem 0;
+  color: #333;
+  line-height: 1.6;
+}
+
+.image-difference .image-item button {
+  width: 100%;
+  padding: 0.75rem;
+  background: #6c757d;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.image-difference .image-item button:hover {
+  background: #5a6268;
+}
+
+.image-difference .image-item button:focus {
+  outline: 2px solid #5a6268;
+  outline-offset: 2px;
+}
+
+/* 无障碍图片选择样式 */
+.accessible-image-selection {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 2rem;
+  padding: 2rem;
+}
+
+.accessible-image-selection .image-item {
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 1.5rem;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.accessible-image-selection .image-item:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.accessible-image-selection .image-item img {
+  width: 100%;
+  height: 250px;
+  object-fit: cover;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+}
+
+.accessible-image-selection .description {
+  margin-top: 1rem;
+}
+
+.accessible-image-selection .description p {
+  margin: 0.5rem 0 1rem;
+  color: #333;
+  line-height: 1.6;
+  font-size: 1rem;
+}
+
+.accessible-image-selection .button-group {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.accessible-image-selection .button-group button {
+  flex: 1;
+  padding: 0.75rem;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.accessible-image-selection .read-aloud-btn {
+  background: #17a2b8;
+  color: white;
+}
+
+.accessible-image-selection .read-aloud-btn:hover {
+  background: #138496;
+}
+
+.accessible-image-selection .read-aloud-btn:focus {
+  outline: 2px solid #138496;
+  outline-offset: 2px;
+}
+
+.accessible-image-selection .select-btn {
+  background: #007bff;
+  color: white;
+}
+
+.accessible-image-selection .select-btn:hover {
+  background: #0056b3;
+}
+
+.accessible-image-selection .select-btn:focus {
+  outline: 2px solid #0056b3;
+  outline-offset: 2px;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .image-comparison,
+  .image-difference {
+    grid-template-columns: 1fr;
+  }
+
+  .accessible-image-selection .button-group {
+    flex-direction: column;
+  }
+}

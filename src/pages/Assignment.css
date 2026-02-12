@@ -1,0 +1,130 @@
+/* Assignment page styles */
+.assignment-page {
+  min-height: 100vh;
+  padding: 2rem;
+  background: linear-gradient(135deg, #f5f7fa 0%, #e4e8ec 100%);
+}
+
+.assignment-header {
+  max-width: 1200px;
+  margin: 0 auto 2rem;
+  padding: 1.5rem;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.assignment-header h1 {
+  margin: 0 0 0.5rem;
+  color: #1a1a2e;
+  font-size: 1.75rem;
+}
+
+.assignment-header p {
+  margin: 0;
+  color: #666;
+}
+
+.assignment-content {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.assignment-form {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.form-group input[type="text"],
+.form-group textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border-color 0.2s;
+}
+
+.form-group input[type="text"]:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #4a90d9;
+}
+
+.form-group textarea {
+  min-height: 150px;
+  resize: vertical;
+}
+
+.btn-primary {
+  padding: 0.75rem 1.5rem;
+  background: #4a90d9;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn-primary:hover {
+  background: #357abd;
+}
+
+.btn-primary:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.error-message {
+  padding: 1rem;
+  background: #fee;
+  border: 1px solid #fcc;
+  border-radius: 8px;
+  color: #c00;
+  margin-bottom: 1rem;
+}
+
+/* 无障碍模式适配 */
+[data-theme="visual-impaired"] .assignment-page {
+  background: #fff;
+}
+
+[data-theme="visual-impaired"] .assignment-header,
+[data-theme="visual-impaired"] .assignment-form {
+  box-shadow: none;
+  border: 2px solid #333;
+}
+
+[data-font-size="large"] .assignment-header h1 {
+  font-size: 2.25rem;
+}
+
+[data-high-contrast="true"] .assignment-page {
+  background: #000;
+}
+
+[data-high-contrast="true"] .assignment-header,
+[data-high-contrast="true"] .assignment-form {
+  background: #000;
+  border: 2px solid #fff;
+}
+
+[data-high-contrast="true"] .assignment-header h1,
+[data-high-contrast="true"] .form-group label {
+  color: #fff;
+}

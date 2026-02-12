@@ -1,0 +1,54 @@
+/* 视频内容总结 */
+.video-summary {
+  background-color: var(--bg-secondary);
+  border: 2px solid var(--border-color);
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.summary-title {
+  margin: 0 0 1rem 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.summary-title::before {
+  content: '📝';
+  font-size: 1.3rem;
+}
+
+.summary-content {
+  background-color: var(--bg-primary);
+  border-left: 4px solid var(--primary-color, #007bff);
+  padding: 1rem;
+  border-radius: 4px;
+}
+
+.summary-content p {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.8;
+  color: var(--text-primary);
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .video-summary {
+    padding: 1rem;
+  }
+
+  .summary-content {
+    padding: 0.75rem;
+  }
+
+  .summary-content p {
+    font-size: 0.95rem;
+  }
+}
