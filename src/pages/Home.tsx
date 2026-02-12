@@ -8,9 +8,8 @@ import VideoImport from '@/components/VideoImport'
 import VideoList from '@/components/VideoList'
 import { extractPageContent } from '@/utils/contentExtractor'
 import { VideoInfo } from '@/types'
+import { videoApi } from '@/api/client'
 import './Home.css'
-
-const API_URL = 'http://localhost:3002/api/videos'
 
 // 初始示例视频数据（仅在服务器无数据时使用）
 const initialVideos: VideoInfo[] = [
@@ -110,37 +109,30 @@ function Home() {
   const { user, logout } = useAuthStore()
   const [videos, setVideos] = useState<VideoInfo[]>([])
   const [pageContent, setPageContent] = useState('')
-  const [isLoading, setIsLoading] = useState(true)
 
   // 从服务器获取视频列表
   useEffect(() => {
     const fetchVideos = async () => {
       try {
-        const response = await fetch(API_URL)
-        const data = await response.json()
+        const response = await videoApi.getList()
+        const data = response.data
 
-        if (data.success && data.data && data.data.length > 0) {
+        if (data && data.length > 0) {
           // 使用服务器数据
-          setVideos(data.data)
+          setVideos(data as VideoInfo[])
         } else {
           // 服务器没有数据，使用示例数据并同步到服务器
           setVideos(initialVideos)
 
           // 同步示例数据到服务器
           for (const video of initialVideos) {
-            await fetch(API_URL, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(video)
-            })
+            await videoApi.create(video)
           }
         }
       } catch (error) {
         console.error('获取视频列表失败:', error)
         // 如果服务器不可用，使用本地示例数据
         setVideos(initialVideos)
-      } finally {
-        setIsLoading(false)
       }
     }
 
@@ -150,15 +142,10 @@ function Home() {
   // 添加视频到服务器
   const handleVideoAdd = async (video: VideoInfo) => {
     try {
-      const response = await fetch(API_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(video)
-      })
+      const response = await videoApi.create(video)
 
-      if (response.ok) {
-        const data = await response.json()
-        setVideos(prev => [...prev, data.data])
+      if (response.success && response.data) {
+        setVideos(prev => [...prev, response.data as VideoInfo])
       } else {
         // 如果服务器失败，仍添加到本地状态
         setVideos(prev => [...prev, video])
@@ -173,9 +160,7 @@ function Home() {
   // 从服务器删除视频
   const handleVideoRemove = async (videoId: string) => {
     try {
-      await fetch(`${API_URL}/${videoId}`, {
-        method: 'DELETE'
-      })
+      await videoApi.delete(videoId)
     } catch (error) {
       console.error('删除视频失败:', error)
     } finally {

@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>API 测试页面 - 无障碍AI教学平台</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      max-width: 800px; margin: 0 auto; padding: 20px;
+      background: #f5f5f5; color: #333;
+    }
+    h1 { color: #1976d2; margin-bottom: 20px; }
+    h2 { margin: 20px 0 10px; color: #555; }
+    .card {
+      background: white; border-radius: 8px; padding: 20px;
+      margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .status { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 14px; }
+    .status.ok { background: #e8f5e9; color: #2e7d32; }
+    .status.error { background: #ffebee; color: #c62828; }
+    .status.loading { background: #fff3e0; color: #ef6c00; }
+    input[type="text"] {
+      width: 100%; padding: 12px; border: 1px solid #ddd;
+      border-radius: 6px; font-size: 16px; margin: 10px 0;
+    }
+    button {
+      background: #1976d2; color: white; border: none;
+      padding: 12px 24px; border-radius: 6px; cursor: pointer;
+      font-size: 16px; margin-right: 10px; margin-top: 10px;
+    }
+    button:hover { background: #1565c0; }
+    button:disabled { background: #ccc; cursor: not-allowed; }
+    .log {
+      background: #263238; color: #aed581; padding: 15px;
+      border-radius: 6px; font-family: monospace; font-size: 13px;
+      max-height: 300px; overflow-y: auto; white-space: pre-wrap;
+    }
+    .log .error { color: #ef5350; }
+    .log .success { color: #66bb6a; }
+    .log .info { color: #42a5f5; }
+    .log .warn { color: #ffa726; }
+    .section { margin: 30px 0; }
+    .quick-links { margin: 20px 0; }
+    .quick-links a {
+      display: inline-block; margin-right: 15px; color: #1976d2;
+    }
+  </style>
+</head>
+<body>
+  <h1>🧪 API 测试页面</h1>
+
+  <div class="quick-links">
+    <span>快速访问：</span>
+    <a href="http://localhost:3001/health" target="_blank">后端健康检查</a>
+    <a href="http://localhost:8001/docs" target="_blank">bilibili-subtitle API 文档</a>
+  </div>
+
+  <!-- 服务状态 -->
+  <div class="section">
+    <h2>📊 服务状态</h2>
+    <div class="card">
+      <p>Express 后端 (3001): <span id="backend-status" class="status loading">检查中...</span></p>
+      <p>bilibili-subtitle (8001): <span id="subtitle-status" class="status loading">检查中...</span></p>
+      <p>bili_text (8000): <span id="bili-status" class="status loading">检查中...</span></p>
+    </div>
+  </div>
+
+  <!-- 字幕提取测试 -->
+  <div class="section">
+    <h2>📝 字幕提取测试</h2>
+    <div class="card">
+      <label>B站视频URL:</label>
+      <input type="text" id="video-url" placeholder="https://www.bilibili.com/video/BV1xxx/"
+             value="https://www.bilibili.com/video/BV1ps4y1Q7Yy/">
+      <button onclick="extractSubtitle()" id="extract-btn">提取字幕</button>
+      <button onclick="testAll()">一键测试全部</button>
+      <div id="extract-result" style="margin-top: 15px;"></div>
+    </div>
+  </div>
+
+  <!-- 视频分析测试 -->
+  <div class="section">
+    <h2>🔍 完整视频分析测试</h2>
+    <div class="card">
+      <label>B站视频URL:</label>
+      <input type="text" id="analyze-url" placeholder="https://www.bilibili.com/video/BV1xxx/"
+             value="https://www.bilibili.com/video/BV1ps4y1Q7Yy/">
+      <button onclick="analyzeVideo()" id="analyze-btn">开始分析</button>
+      <div id="analyze-result" style="margin-top: 15px;"></div>
+    </div>
+  </div>
+
+  <!-- 日志输出 -->
+  <div class="section">
+    <h2>📋 执行日志</h2>
+    <button onclick="clearLog()">清空日志</button>
+    <div class="log" id="log"></div>
+  </div>
+
+  <script>
+    const API_BASE = 'http://localhost:3001';
+
+    // 日志函数
+    function log(msg, type = 'info') {
+      const logDiv = document.getElementById('log');
+      const time = new Date().toLocaleTimeString();
+      logDiv.innerHTML += `<span class="${type}">[${time}] ${msg}</span>\n`;
+      logDiv.scrollTop = logDiv.scrollHeight;
+    }
+    function clearLog() { document.getElementById('log').innerHTML = ''; }
+
+    // 检查服务状态
+    async function checkServices() {
+      const services = [
+        { id: 'backend-status', url: `${API_BASE}/health`, name: 'Express 后端' },
+        { id: 'subtitle-status', url: 'http://localhost:8001/health', name: 'bilibili-subtitle' },
+        { id: 'bili-status', url: 'http://localhost:8000/health', name: 'bili_text' }
+      ];
+
+      for (const s of services) {
+        try {
+          const res = await fetch(s.url, { timeout: 3000 });
+          const el = document.getElementById(s.id);
+          if (res.ok) {
+            el.textContent = '✓ 运行中';
+            el.className = 'status ok';
+          } else {
+            el.textContent = '✗ 异常';
+            el.className = 'status error';
+          }
+        } catch {
+          const el = document.getElementById(s.id);
+          el.textContent = '✗ 未运行';
+          el.className = 'status error';
+        }
+      }
+    }
+
+    // 提取字幕
+    async function extractSubtitle() {
+      const url = document.getElementById('video-url').value;
+      const btn = document.getElementById('extract-btn');
+      const result = document.getElementById('extract-result');
+
+      if (!url) { log('请输入视频URL', 'error'); return; }
+
+      btn.disabled = true;
+      result.innerHTML = '<p class="loading">提取中...</p>';
+      log(`开始提取字幕: ${url}`, 'info');
+
+      try {
+        log('调用 bilibili-subtitle 服务...', 'info');
+        const res = await fetch(`${API_BASE}/api/gateway/subtitle`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ videoUrl: url })
+        });
+
+        const data = await res.json();
+        log(`响应状态: ${res.status}`, data.success ? 'success' : 'error');
+
+        if (data.success && data.data) {
+          const d = data.data;
+          const subtitleCount = d.subtitle_srt ? d.subtitle_srt.split('\n\n').length : 0;
+          result.innerHTML = `
+            <p class="success">✓ 提取成功!</p>
+            <p>来源: ${d.source === 'bilibili' ? 'B站官方字幕' : 'FunASR转录'}</p>
+            <p>字幕条数: ${subtitleCount}</p>
+            <p>字幕预览:</p>
+            <pre style="background:#f5f5f5;padding:10px;overflow:auto;max-height:200px;">${d.subtitle_srt?.slice(0, 500)}...</pre>
+          `;
+          log(`字幕提取成功，来源: ${d.source}，条数: ${subtitleCount}`, 'success');
+        } else {
+          result.innerHTML = `<p class="error">✗ 失败: ${data.message || '未知错误'}</p>`;
+          log(`字幕提取失败: ${data.message}`, 'error');
+        }
+      } catch (e) {
+        result.innerHTML = `<p class="error">✗ 网络错误: ${e.message}</p>`;
+        log(`网络错误: ${e.message}`, 'error');
+      }
+
+      btn.disabled = false;
+    }
+
+    // 视频分析
+    async function analyzeVideo() {
+      const url = document.getElementById('analyze-url').value;
+      const btn = document.getElementById('analyze-btn');
+      const result = document.getElementById('analyze-result');
+
+      if (!url) { log('请输入视频URL', 'error'); return; }
+
+      btn.disabled = true;
+      result.innerHTML = '<p class="loading">分析中（可能需要1-3分钟）...</p>';
+      log(`开始视频分析: ${url}`, 'info');
+
+      try {
+        log('提交分析任务...', 'info');
+        const res = await fetch(`${API_BASE}/api/gateway/bilibili/analyze`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            url,
+            options: {
+              audio_transcription: false,
+              visual_analysis: 'all',
+              frame_interval: 2.0
+            }
+          })
+        });
+
+        const data = await res.json();
+        log(`任务提交响应: ${JSON.stringify(data)}`, data.success ? 'success' : 'error');
+
+        if (data.success && data.data) {
+          const taskId = data.data.taskId;
+          result.innerHTML = `<p class="loading">任务已创建，ID: ${taskId}<br>正在等待分析完成...</p>`;
+          log(`任务ID: ${taskId}，轮询状态...`, 'info');
+
+          // 轮询状态
+          let attempts = 0;
+          const maxAttempts = 90; // 3分钟
+          while (attempts < maxAttempts) {
+            await new Promise(r => setTimeout(r, 2000));
+            attempts++;
+
+            try {
+              const statusRes = await fetch(`${API_BASE}/api/gateway/bilibili/tasks/${taskId}/status`);
+              const statusData = await statusRes.json();
+
+              if (statusData.success && statusData.data) {
+                const s = statusData.data;
+                log(`状态: ${s.status}, 进度: ${s.progress}%`, 'info');
+                result.innerHTML = `<p>状态: ${s.status}<br>进度: ${s.progress}%<br>${s.message || ''}</p>`;
+
+                if (s.status === 'completed') {
+                  const resultRes = await fetch(`${API_BASE}/api/gateway/bilibili/tasks/${taskId}/result`);
+                  const resultData = await resultRes.json();
+
+                  if (resultData.success && resultData.data) {
+                    const r = resultData.data;
+                    const visualCount = r.visual_content?.length || 0;
+                    const sceneCount = r.scene_descriptions?.length || 0;
+                    result.innerHTML = `
+                      <p class="success">✓ 分析完成!</p>
+                      <p>画面文字: ${visualCount} 条</p>
+                      <p>场景描述: ${sceneCount} 条</p>
+                      <p>总结: ${r.summary?.slice(0, 200)}...</p>
+                    `;
+                    log(`分析完成! 视觉内容: ${visualCount}, 场景: ${sceneCount}`, 'success');
+                  }
+                  break;
+                } else if (s.status === 'failed') {
+                  result.innerHTML = '<p class="error">✗ 分析失败</p>';
+                  log('分析失败', 'error');
+                  break;
+                }
+              }
+            } catch (e) {
+              log(`轮询错误: ${e.message}`, 'warn');
+            }
+          }
+
+          if (attempts >= maxAttempts) {
+            result.innerHTML += '<p class="warn">⏰ 等待超时，请稍后查询状态</p>';
+            log('等待超时', 'warn');
+          }
+        } else {
+          result.innerHTML = `<p class="error">✗ 任务创建失败: ${data.message}</p>`;
+          log(`任务创建失败: ${data.message}`, 'error');
+        }
+      } catch (e) {
+        result.innerHTML = `<p class="error">✗ 网络错误: ${e.message}</p>`;
+        log(`网络错误: ${e.message}`, 'error');
+      }
+
+      btn.disabled = false;
+    }
+
+    // 一键测试
+    async function testAll() {
+      clearLog();
+      log('========== 一键测试开始 ==========', 'info');
+      await checkServices();
+      log('服务状态检查完成', 'info');
+
+      log('---------- 字幕提取测试 ----------', 'info');
+      await extractSubtitle();
+    }
+
+    // 页面加载时检查服务状态
+    checkServices();
+    setInterval(checkServices, 10000); // 每10秒刷新
+  </script>
+</body>
+</html>

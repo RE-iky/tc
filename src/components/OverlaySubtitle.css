@@ -1,0 +1,213 @@
+/* 字幕覆盖层基础样式 */
+.overlay-subtitle {
+  position: absolute;
+  left: 0;
+  right: 0;
+  padding: 1rem 1.5rem;
+  text-align: center;
+  pointer-events: none; /* 让点击穿透到视频 */
+  z-index: 100;
+  transition: opacity 0.3s ease;
+}
+
+/* 位置变体 */
+.overlay-subtitle.position-bottom {
+  bottom: 10%;
+}
+
+.overlay-subtitle.position-center {
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.overlay-subtitle.position-top {
+  top: 10%;
+}
+
+/* 淡入淡出动画 */
+.overlay-subtitle.fade-in {
+  opacity: 1;
+}
+
+.overlay-subtitle.fade-out {
+  opacity: 0;
+}
+
+/* 字幕内容样式 */
+.subtitle-content {
+  display: inline-block;
+  max-width: 90%;
+  padding: 0.75rem 1.5rem;
+  background: rgba(0, 0, 0, 0.8);
+  color: #fff;
+  font-size: 1.5rem;
+  font-weight: 500;
+  line-height: 1.4;
+  border-radius: 8px;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+/* 字体大小变体 */
+.overlay-subtitle.font-small .subtitle-content {
+  font-size: 1.25rem;
+  padding: 0.5rem 1rem;
+}
+
+.overlay-subtitle.font-medium .subtitle-content {
+  font-size: 1.5rem;
+  padding: 0.75rem 1.5rem;
+}
+
+.overlay-subtitle.font-large .subtitle-content {
+  font-size: 2rem;
+  padding: 1rem 2rem;
+}
+
+.overlay-subtitle.font-xlarge .subtitle-content {
+  font-size: 2.5rem;
+  padding: 1.25rem 2.5rem;
+}
+
+/* 高对比度模式 */
+.overlay-subtitle.high-contrast .subtitle-content {
+  background: #000;
+  color: #fff;
+  border: 3px solid #fff;
+  text-shadow: none;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+
+.overlay-subtitle.high-contrast.font-large .subtitle-content {
+  font-size: 2.25rem;
+}
+
+.overlay-subtitle.high-contrast.font-xlarge .subtitle-content {
+  font-size: 3rem;
+}
+
+/* 视障模式 */
+.overlay-subtitle.visual-mode .subtitle-content {
+  background: rgba(0, 0, 0, 0.95);
+  font-size: 1.75rem;
+}
+
+/* ============================================ */
+/* 字幕显示面板样式 */
+/* ============================================ */
+
+.subtitle-display {
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+.subtitle-display.empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  color: var(--text-secondary, #666);
+  font-style: italic;
+}
+
+.subtitle-line {
+  display: flex;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  margin-bottom: 0.25rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.subtitle-line:hover {
+  background: var(--bg-hover, #f0f0f0);
+}
+
+.subtitle-line:focus {
+  outline: 2px solid var(--primary-color, #1976d2);
+  outline-offset: 2px;
+}
+
+.subtitle-line.current {
+  background: linear-gradient(135deg, #667eea20 0%, #764ba220 100%);
+  border-left: 3px solid var(--primary-color, #667eea);
+}
+
+.subtitle-time {
+  flex-shrink: 0;
+  font-family: monospace;
+  font-size: 0.875rem;
+  color: var(--text-secondary, #666);
+}
+
+.subtitle-text {
+  flex: 1;
+  line-height: 1.6;
+}
+
+/* 高对比度面板模式 */
+.subtitle-display.high-contrast .subtitle-line.current {
+  background: #000;
+  border-left-color: #fff;
+}
+
+.subtitle-display.high-contrast .subtitle-time {
+  color: #fff;
+}
+
+.subtitle-display.high-contrast .subtitle-text {
+  color: #fff;
+}
+
+.subtitle-display.high-contrast .subtitle-line:hover {
+  background: #333;
+}
+
+/* 面板字体大小 */
+.subtitle-display.font-small .subtitle-text {
+  font-size: 1rem;
+}
+
+.subtitle-display.font-medium .subtitle-text {
+  font-size: 1.125rem;
+}
+
+.subtitle-display.font-large .subtitle-text {
+  font-size: 1.375rem;
+}
+
+.subtitle-display.font-xlarge .subtitle-text {
+  font-size: 1.625rem;
+}
+
+/* ============================================ */
+/* 响应式设计 */
+/* ============================================ */
+
+@media (max-width: 768px) {
+  .subtitle-content {
+    font-size: 1.25rem !important;
+    padding: 0.5rem 1rem !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .subtitle-content {
+    font-size: 1rem !important;
+    max-width: 95%;
+  }
+}
+
+/* 打印样式 */
+@media print {
+  .overlay-subtitle {
+    position: relative;
+    page-break-inside: avoid;
+  }
+
+  .subtitle-content {
+    background: none;
+    color: #000;
+    border: 1px solid #000;
+  }
+}

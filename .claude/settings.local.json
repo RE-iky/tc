@@ -12,7 +12,15 @@
       "Bash(node start-all.js:*)",
       "Bash(node test_frontend_backend_flow.js:*)",
       "Bash(where:*)",
-      "Bash(powershell:*)"
+      "Bash(powershell:*)",
+      "Bash(dir:*)",
+      "Bash(npx tsc:*)",
+      "Bash(del:*)",
+      "Bash(node:*)",
+      "Bash(xxd)",
+      "Bash(python:*)",
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nchore: 更新端口配置为8001\n\n- 将服务端口从8000改为8001\n- 更新文档中的端口引用\nEOF\n\\)\")"
     ]
   }
 }

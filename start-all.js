@@ -1,12 +1,18 @@
 #!/usr/bin/env node
 /**
  * 统一启动脚本
- * 一键启动所有服务：bili_text API + Express 后端 + 前端
+ * 一键启动所有服务：bilibili-subtitle + bili_text + Express 后端 + 前端
  *
  * 服务端口：
- *   - BiliText API: 8000 (Python/FastAPI - B站视频分析)
- *   - Express 后端: 3001/3002 (Node.js/Express)
+ *   - bilibili-subtitle: 8001 (Python/FastAPI - 字幕提取，阿里云FunASR方案)
+ *   - bili_text: 8000 (Python/FastAPI - 完整视频分析，火山引擎方案)
+ *   - Express 后端: 3001 (Node.js/Express - 统一API网关)
  *   - 前端开发: 5173 (Vite)
+ *
+ * 字幕处理策略：
+ *   1. 优先使用 bilibili-subtitle (8001) 获取B站官方字幕
+ *   2. 失败则调用 FunASR 进行语音转录
+ *   3. 需要完整视觉分析时降级到 bili_text (8000)
  */
 
 import { spawn, exec } from 'child_process'
@@ -21,7 +27,8 @@ const __dirname = dirname(__filename)
 const BACKEND_PORT = process.env.PORT || 3001
 const BACKEND_URL = `http://localhost:${BACKEND_PORT}`
 const FRONTEND_URL = 'http://localhost:5173'
-const BILITEXT_URL = 'http://localhost:8000'
+const BILITEXT_URL = process.env.BILI_TEXT_API_URL || 'http://localhost:8000'
+const BILISUBTITLE_URL = process.env.BILIBILI_SUBTITLE_API_URL || 'http://localhost:8001'
 const CHECK_INTERVAL = 1000 // 1秒
 const MAX_WAIT_TIME = 30000 // 30秒
 
@@ -44,6 +51,19 @@ function logSection(title) {
   console.log(`\n${'='.repeat(60)}`)
   log(title, 'cyan')
   console.log(`${'='.repeat(60)}\n`)
+}
+
+// 检查端口是否被占用
+async function checkPort(port) {
+  return new Promise((resolve) => {
+    const cmd = process.platform === 'win32'
+      ? `netstat -ano | findstr :${port}`
+      : `lsof -i :${port}`
+
+    exec(cmd, (error, stdout) => {
+      resolve(stdout.trim().length > 0)
+    })
+  })
 }
 
 // 检查服务是否运行
@@ -72,14 +92,23 @@ async function waitForService(url, name, maxWaitTime = MAX_WAIT_TIME) {
   return false
 }
 
-// 启动 BiliText 服务
-async function startBiliText() {
-  logSection('🚀 启动 BiliText 服务 (端口 8000)')
+// 启动 Python 服务（统一方法）
+async function startPythonService(name, port, scriptPath, healthPath) {
+  const serviceUrl = `http://localhost:${port}`
+  logSection(`🚀 启动 ${name} 服务 (端口 ${port})`)
 
-  // 检查是否已在运行
-  const biliTextRunning = await checkService(`${BILITEXT_URL}/health`, 'BiliText')
-  if (biliTextRunning) {
-    log('✓ BiliText 服务已在运行', 'green')
+  // 检查端口是否被占用
+  const portInUse = await checkPort(port)
+  if (portInUse) {
+    log(`⚠ 端口 ${port} 已被占用，检查服务状态...`, 'yellow')
+
+    // 检查服务是否已运行
+    if (await checkService(`${serviceUrl}${healthPath}`, name)) {
+      log(`✓ ${name} 服务已在运行`, 'green')
+      return null
+    }
+
+    log(`⚠ 端口被占用但服务无响应，需要清理`, 'yellow')
     return null
   }
 
@@ -92,71 +121,75 @@ async function startBiliText() {
       })
     })
   } catch {
-    log('⚠ 未安装 uv 包管理器，请手动安装: https://docs.astral.sh/uv/', 'yellow')
-    log('  跳过 BiliText 服务启动', 'yellow')
+    log(`⚠ 未安装 uv 包管理器，请手动安装: https://docs.astral.sh/uv/`, 'yellow')
+    log(`  跳过 ${name} 服务启动`, 'yellow')
     return null
   }
 
-  return new Promise((resolve, reject) => {
-    const biliTextPath = join(__dirname, 'api')
+  return new Promise((resolve) => {
     const isWindows = process.platform === 'win32'
 
-    // Windows 下使用 uvicorn.exe，非 Windows 使用 uv run
+    // Windows 下使用 python -m uvicorn
     const command = isWindows
-      ? '.venv\\Scripts\\uvicorn.exe'
+      ? process.execPath || 'python'
       : 'uv'
     const args = isWindows
-      ? ['bili_text.server.app:app', '--host', '0.0.0.0', '--port', '8000', '--reload']
-      : ['run', '--with', 'uvicorn[standard]', 'uvicorn', 'bili_text.server.app:app', '--host', '0.0.0.0', '--port', '8000']
+      ? ['-m', 'uvicorn', scriptPath, '--host', '0.0.0.0', '--port', port.toString()]
+      : ['run', '--with', 'uvicorn[standard]', 'uvicorn', scriptPath, '--host', '0.0.0.0', '--port', port.toString()]
 
     log(`执行: ${command} ${args.join(' ')}`, 'blue')
 
-    const biliText = spawn(command, args, {
-      cwd: biliTextPath,
+    const proc = spawn(command, args, {
+      cwd: dirname(scriptPath) === '.' ? __dirname : dirname(scriptPath),
       shell: true,
       stdio: ['ignore', 'pipe', 'pipe'],
-      env: { ...process.env }
+      env: { ...process.env, PYTHONIOENCODING: 'utf-8' }
     })
 
     let started = false
+    const procName = name
 
-    biliText.stdout.on('data', (data) => {
-      const output = data.toString()
-      process.stdout.write(`[BiliText] ${output}`)
+    proc.stdout.on('data', (data) => {
+      const output = data.toString().trim()
+      if (output) {
+        process.stdout.write(`[${procName}] ${output}\n`)
+      }
 
       if (!started && (output.includes('Application startup complete') || output.includes('Uvicorn running'))) {
-        log('✓ BiliText 服务启动成功', 'green')
+        log(`✓ ${name} 服务启动成功`, 'green')
         started = true
-        resolve(biliText)
+        resolve(proc)
       }
     })
 
-    biliText.stderr.on('data', (data) => {
-      const error = data.toString()
-      if (!started && error.includes('EADDRINUSE')) {
-        log('⚠ BiliText 端口已被占用', 'yellow')
+    proc.stderr.on('data', (data) => {
+      const error = data.toString().trim()
+      if (error) {
+        // 忽略常见的 Python 警告
+        if (error.includes('UserWarning') || error.includes('DeprecationWarning') || error.includes('torch')) {
+          return
+        }
+        process.stderr.write(`[${procName} Error] ${error}\n`)
+      }
+
+      if (!started && (error.includes('EADDRINUSE') || error.includes('端口已被占用'))) {
+        log(`⚠ ${name} 端口已被占用`, 'yellow')
         resolve(null)
-        return
       }
-      // 忽略常见的 Python 警告
-      if (error.includes('UserWarning') || error.includes('DeprecationWarning') || error.includes('torch')) {
-        return
-      }
-      process.stderr.write(`[BiliText Error] ${error}`)
     })
 
-    biliText.on('error', (error) => {
-      log(`✗ BiliText 服务启动失败: ${error.message}`, 'red')
-      reject(error)
+    proc.on('error', (error) => {
+      log(`✗ ${name} 服务启动失败: ${error.message}`, 'red')
+      resolve(null)
     })
 
     // 超时处理
     setTimeout(() => {
       if (!started) {
-        log('⚠ BiliText 服务启动超时', 'yellow')
+        log(`⚠ ${name} 服务启动超时`, 'yellow')
         resolve(null)
       }
-    }, 20000)
+    }, 30000)
   })
 }
 
@@ -234,12 +267,18 @@ ${colors.green}╔════════════════════�
 ${colors.green}║           无障碍AI教学平台 - 服务已就绪                    ║${colors.reset}
 ${colors.green}╠══════════════════════════════════════════════════════════════╣${colors.reset}
 ${colors.green}║                                                              ║${colors.reset}
-${colors.cyan}  📊 BiliText API:  ${colors.reset}http://localhost:8000              ${colors.green}║${colors.reset}
-${colors.cyan}  🌐 Express 后端:   ${colors.reset}http://localhost:${BACKEND_PORT}              ${colors.green}║${colors.reset}
-${colors.cyan}  🎨 前端开发:     ${colors.reset}http://localhost:5173             ${colors.green}║${colors.reset}
-${colors.cyan}  📖 API 文档:     ${colors.reset}http://localhost:8000/docs            ${colors.green}║${colors.reset}
+${colors.cyan}  📖 bilibili-subtitle: ${colors.reset}http://localhost:8001           ${colors.green}║${colors.reset}
+${colors.cyan}  📊 BiliText API:       ${colors.reset}http://localhost:8000              ${colors.green}║${colors.reset}
+${colors.cyan}  🌐 Express 后端:        ${colors.reset}http://localhost:${BACKEND_PORT}              ${colors.green}║${colors.reset}
+${colors.cyan}  🎨 前端开发:          ${colors.reset}http://localhost:5173             ${colors.green}║${colors.reset}
+${colors.cyan}  📖 API 文档:          ${colors.reset}http://localhost:8001/docs         ${colors.green}║${colors.reset}
 ${colors.green}║                                                              ║${colors.reset}
 ${colors.green}╚══════════════════════════════════════════════════════════════╝${colors.reset}
+
+${colors.yellow}字幕处理策略:${colors.reset}
+  1. 优先使用 bilibili-subtitle 获取B站官方字幕
+  2. 失败则调用 FunASR 进行语音转录
+  3. 需要完整视觉分析时降级到 bili_text
 
 ${colors.yellow}按 Ctrl+C 停止所有服务${colors.reset}
 `)
@@ -253,8 +292,27 @@ async function main() {
   const processes = []
 
   try {
-    // 1. 启动 BiliText 服务
-    const biliText = await startBiliText()
+    // 1. 启动 bilibili-subtitle 服务（字幕优先）
+    const biliSub = await startPythonService(
+      'bilibili-subtitle',
+      8001,
+      'main:app',
+      '/health'
+    )
+    if (biliSub) processes.push(biliSub)
+
+    // 等待 bilibili-subtitle 就绪
+    if (biliSub) {
+      await waitForService(`${BILISUBTITLE_URL}/health`, 'bilibili-subtitle', 20000)
+    }
+
+    // 2. 启动 BiliText 服务（完整分析，降级使用）
+    const biliText = await startPythonService(
+      'BiliText',
+      8000,
+      'bili_text.server.app:app',
+      '/health'
+    )
     if (biliText) processes.push(biliText)
 
     // 等待 BiliText 就绪
@@ -262,14 +320,14 @@ async function main() {
       await waitForService(`${BILITEXT_URL}/health`, 'BiliText', 20000)
     }
 
-    // 2. 启动 Express 后端
+    // 3. 启动 Express 后端
     const backend = await startBackend()
     if (backend) processes.push(backend)
 
     // 等待后端就绪
     await waitForService(`${BACKEND_URL}/health`, 'Express 后端', 15000)
 
-    // 3. 启动前端
+    // 4. 启动前端
     const frontend = startFrontend()
     processes.push(frontend)
 

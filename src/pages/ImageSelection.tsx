@@ -4,6 +4,7 @@ import ImageGallery from '@/components/ImageGallery'
 import ImageComparison from '@/components/ImageComparison'
 import '@/components/ImageComponents.css'
 import { ImageInfo } from '@/types'
+import { imageApi } from '@/api/client'
 
 const ImageSelection: React.FC = () => {
   const navigate = useNavigate()
@@ -35,23 +36,12 @@ const ImageSelection: React.FC = () => {
   // 调用 API 获取图片描述
   const getImageDescription = async (imageData: string, fileName: string): Promise<string> => {
     try {
-      const response = await fetch('http://localhost:3001/api/images/describe', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          imageData,
-          fileName,
-        }),
-      })
+      const response = await imageApi.describe(imageData, fileName)
 
-      const data = await response.json()
-
-      if (data.success) {
-        return data.description
+      if (response.success && response.data) {
+        return (response.data as { description: string }).description
       } else {
-        console.error('获取图片描述失败:', data.message)
+        console.error('获取图片描述失败:', response.message)
         return `上传的图片: ${fileName}`
       }
     } catch (error) {

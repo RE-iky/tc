@@ -11,9 +11,16 @@ interface VideoListProps {
 
 type FilterType = 'all' | 'teacher' | 'student'
 
+interface DeleteConfirmState {
+  show: boolean
+  video: VideoInfo | null
+}
+
 function VideoList({ videos, onVideoRemove }: VideoListProps) {
   const [selectedVideo, setSelectedVideo] = useState<VideoInfo | null>(null)
   const [filter, setFilter] = useState<FilterType>('all')
+  const [deleteConfirm, setDeleteConfirm] = useState<DeleteConfirmState>({ show: false, video: null })
+  const [isDeleting, setIsDeleting] = useState(false)
 
   const getFilteredVideos = () => {
     if (filter === 'all') return videos
@@ -24,6 +31,30 @@ function VideoList({ videos, onVideoRemove }: VideoListProps) {
 
   const getRoleLabel = (role: UserRole) => {
     return role === 'teacher' ? '教师' : '学生'
+  }
+
+  // 显示删除确认对话框
+  const showDeleteConfirm = (e: React.MouseEvent, video: VideoInfo) => {
+    e.stopPropagation()
+    setDeleteConfirm({ show: true, video })
+  }
+
+  // 确认删除
+  const confirmDelete = async () => {
+    if (!deleteConfirm.video) return
+
+    setIsDeleting(true)
+    try {
+      await onVideoRemove(deleteConfirm.video.id)
+      setDeleteConfirm({ show: false, video: null })
+    } finally {
+      setIsDeleting(false)
+    }
+  }
+
+  // 取消删除
+  const cancelDelete = () => {
+    setDeleteConfirm({ show: false, video: null })
   }
 
   if (videos.length === 0) {
@@ -69,6 +100,43 @@ function VideoList({ videos, onVideoRemove }: VideoListProps) {
         />
       )}
 
+      {/* 删除确认对话框 */}
+      {deleteConfirm.show && deleteConfirm.video && (
+        <div
+          className="delete-confirm-overlay"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="delete-title"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) cancelDelete()
+          }}
+        >
+          <div className="delete-confirm-dialog">
+            <h4 id="delete-title">确认删除</h4>
+            <p>确定要删除视频 <strong>{deleteConfirm.video.title}</strong> 吗？</p>
+            {deleteConfirm.video.isLocal && (
+              <p className="delete-warning">注意：此操作将同时删除本地视频文件，且无法恢复。</p>
+            )}
+            <div className="delete-confirm-actions">
+              <button
+                className="btn-cancel"
+                onClick={cancelDelete}
+                disabled={isDeleting}
+              >
+                取消
+              </button>
+              <button
+                className="btn-confirm-delete"
+                onClick={confirmDelete}
+                disabled={isDeleting}
+              >
+                {isDeleting ? '删除中...' : '确认删除'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {filteredVideos.length === 0 ? (
         <p className="no-results">没有符合条件的视频</p>
       ) : (
@@ -96,6 +164,11 @@ function VideoList({ videos, onVideoRemove }: VideoListProps) {
                       📝 字幕
                     </span>
                   )}
+                  {video.isLocal && (
+                    <span className="video-badge local" aria-label="本地视频">
+                      💾 本地
+                    </span>
+                  )}
                 </div>
               </div>
 
@@ -108,7 +181,7 @@ function VideoList({ videos, onVideoRemove }: VideoListProps) {
                   播放
                 </button>
                 <button
-                  onClick={() => onVideoRemove(video.id)}
+                  onClick={(e) => showDeleteConfirm(e, video)}
                   className="remove-button"
                   aria-label={`删除视频: ${video.title}`}
                 >
